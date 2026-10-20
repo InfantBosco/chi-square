@@ -76,3 +76,46 @@ def generate_reduction_summary(
         "Cardinality reduction percentage": card_red_pct,
     }
     return pd.DataFrame([record])
+
+
+def plot_categories_before_grouping(orig_series: pd.Series, output_path: Path):
+    """Plots category counts before grouping (highlighting the long tail)."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    vc = orig_series.value_counts()
+    ranks = np.arange(len(vc))
+    
+    plt.figure(figsize=(9, 5.5), dpi=300)
+    plt.plot(ranks, vc.values, color="#d62728", lw=2, label="Original Category Counts")
+    plt.fill_between(ranks, vc.values, color="#d62728", alpha=0.15)
+    plt.axhline(100, color="#1f77b4", linestyle="--", lw=1.5, label="Threshold = 100 observations")
+    plt.yscale("log")
+    plt.title(f"Category Frequencies Before Grouping ({orig_series.name}: {len(vc)} Categories)", fontsize=13, fontweight="bold", pad=12)
+    plt.xlabel("Category Rank (Ordered by Descending Frequency)", fontsize=11)
+    plt.ylabel("Observation Count (Log Scale)", fontsize=11)
+    plt.grid(True, linestyle="--", alpha=0.5, which="both")
+    plt.legend(frameon=True, facecolor="white", edgecolor="#cccccc")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
+
+def plot_categories_after_grouping(grouped_series: pd.Series, output_path: Path):
+    """Plots category counts after grouping (showing eliminated tail)."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    vc = grouped_series.value_counts()
+    ranks = np.arange(len(vc))
+    
+    plt.figure(figsize=(9, 5.5), dpi=300)
+    plt.plot(ranks, vc.values, color="#2ca02c", lw=2, label="Transformed Category Counts")
+    plt.fill_between(ranks, vc.values, color="#2ca02c", alpha=0.15)
+    plt.axhline(100, color="#1f77b4", linestyle="--", lw=1.5, label="Threshold = 100 observations")
+    plt.yscale("log")
+    plt.title(f"Category Frequencies After Grouping ({grouped_series.name}: {len(vc)} Categories)", fontsize=13, fontweight="bold", pad=12)
+    plt.xlabel("Category Rank (Ordered by Descending Frequency)", fontsize=11)
+    plt.ylabel("Observation Count (Log Scale)", fontsize=11)
+    plt.grid(True, linestyle="--", alpha=0.5, which="both")
+    plt.legend(frameon=True, facecolor="white", edgecolor="#cccccc")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
