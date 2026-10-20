@@ -5,7 +5,7 @@ Description: Reusable functions for exploratory data analysis, categorical cardi
 """
 
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,9 +36,9 @@ def calculate_categorical_cardinality(df: pd.DataFrame, categorical_cols: List[s
     for col in categorical_cols:
         vc = df[col].value_counts()
         n_unique = df[col].nunique()
-        n_missing = df[col].isnull().sum()
+        n_missing = int(df[col].isnull().sum())
         top_cat = vc.index[0]
-        top_freq = vc.iloc[0]
+        top_freq = int(vc.iloc[0])
         lt_10 = int((vc < 10).sum())
         lt_50 = int((vc < 50).sum())
         lt_100 = int((vc < 100).sum())
@@ -55,3 +55,45 @@ def calculate_categorical_cardinality(df: pd.DataFrame, categorical_cols: List[s
         })
         
     return pd.DataFrame(records)
+
+
+def analyze_and_plot_occp(df: pd.DataFrame, output_path: Path) -> Tuple[int, pd.Series, Dict[str, int]]:
+    """
+    Analyzes OCCP (Occupation Code):
+    - Counts unique categories
+    - Identifies top 20 most frequent categories
+    - Computes categories with <10, <50, <100 observations
+    - Plots frequency distribution and saves to output_path
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    occp_counts = df["OCCP"].value_counts()
+    n_unique = df["OCCP"].nunique()
+    top_20 = occp_counts.head(20)
+    
+    threshold_counts = {
+        "fewer_than_10": int((occp_counts < 10).sum()),
+        "fewer_than_50": int((occp_counts < 50).sum()),
+        "fewer_than_100": int((occp_counts < 100).sum()),
+    }
+    
+    # Plot frequency distribution
+    plt.figure(figsize=(10, 6), dpi=300)
+    plt.plot(range(len(occp_counts)), occp_counts.values, color="#1f77b4", lw=2)
+    plt.fill_between(range(len(occp_counts)), occp_counts.values, color="#1f77b4", alpha=0.2)
+    plt.title("OCCP (Occupation Code) Category Frequency Distribution", fontsize=14, fontweight="bold", pad=12)
+    plt.xlabel("Category Rank (Ordered by Frequency)", fontsize=12)
+    plt.ylabel("Category Frequency (Count)", fontsize=12)
+    plt.yscale("log")
+    plt.grid(True, linestyle="--", alpha=0.5, which="both")
+    
+    # Annotate key characteristics
+    plt.axvline(x=len(occp_counts) - threshold_counts["fewer_than_100"], color="#d62728", linestyle=":", label=f"<100 count: {threshold_counts['fewer_than_100']} categories")
+    plt.axvline(x=len(occp_counts) - threshold_counts["fewer_than_50"], color="#ff7f0e", linestyle=":", label=f"<50 count: {threshold_counts['fewer_than_50']} categories")
+    plt.axvline(x=len(occp_counts) - threshold_counts["fewer_than_10"], color="#2ca02c", linestyle=":", label=f"<10 count: {threshold_counts['fewer_than_10']} categories")
+    
+    plt.legend(frameon=True, facecolor="white", edgecolor="#cccccc")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    
+    return n_unique, top_20, threshold_counts
