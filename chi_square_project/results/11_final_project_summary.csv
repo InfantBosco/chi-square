@@ -1,0 +1,31 @@
+Metric,Value
+Original number of categories,529
+Transformed number of categories,259
+Cardinality reduction percentage,51.0397%
+Baseline chi-square statistic,51535.8043
+Baseline chi-square p-value,0.0
+Transformed chi-square statistic,48444.0265
+Transformed chi-square p-value,0.0
+Original encoded-feature count,813
+Transformed encoded-feature count,543
+Encoded-feature reduction percentage,33.2103%
+Model A Full-test Accuracy,0.7968
+Model A Full-test Precision,0.7597
+Model A Full-test Recall,0.748
+Model A Full-test F1-score,0.7538
+Model A Full-test ROC-AUC,0.875
+Model B Full-test Accuracy,0.7941
+Model B Full-test Precision,0.7548
+Model B Full-test Recall,0.7477
+Model B Full-test F1-score,0.7512
+Model B Full-test ROC-AUC,0.8726
+Model A Rare/unseen-subset Accuracy,0.7627
+Model A Rare/unseen-subset Precision,0.7531
+Model A Rare/unseen-subset Recall,0.7315
+Model A Rare/unseen-subset F1-score,0.7422
+Model A Rare/unseen-subset ROC-AUC,0.8384
+Model B Rare/unseen-subset Accuracy,0.7239
+Model B Rare/unseen-subset Precision,0.701
+Model B Rare/unseen-subset Recall,0.7127
+Model B Rare/unseen-subset F1-score,0.7068
+Model B Rare/unseen-subset ROC-AUC,0.7985
