@@ -59,3 +59,41 @@ def get_high_cardinality_feature(cardinality_summary_df: pd.DataFrame) -> Tuple[
     sorted_df = cardinality_summary_df.sort_values(by="unique_categories", ascending=False)
     top_row = sorted_df.iloc[0]
     return str(top_row["column_name"]), int(top_row["unique_categories"])
+
+
+def calculate_feature_sparsity_metrics(series: pd.Series) -> Dict[str, Any]:
+    """
+    Calculates sparsity metrics for a categorical feature:
+    - Frequency of every category
+    - Count of categories appearing only once
+    - Count appearing < 10 times
+    - Count appearing < 50 times
+    - Count appearing < 100 times
+    - Percentage of observations belonging to rare categories (< 100)
+    - Percentage of categories that are rare (< 100)
+    """
+    vc = series.value_counts()
+    n_total_categories = len(vc)
+    n_total_observations = len(series)
+    
+    once_count = int((vc == 1).sum())
+    lt_10_count = int((vc < 10).sum())
+    lt_50_count = int((vc < 50).sum())
+    lt_100_count = int((vc < 100).sum())
+    
+    obs_lt_100 = int(vc[vc < 100].sum())
+    pct_obs_rare_100 = (obs_lt_100 / n_total_observations) * 100
+    pct_cats_rare_100 = (lt_100_count / n_total_categories) * 100
+    
+    return {
+        "value_counts": vc,
+        "n_categories": n_total_categories,
+        "n_observations": n_total_observations,
+        "once_count": once_count,
+        "lt_10_count": lt_10_count,
+        "lt_50_count": lt_50_count,
+        "lt_100_count": lt_100_count,
+        "obs_lt_100": obs_lt_100,
+        "pct_obs_rare_100": pct_obs_rare_100,
+        "pct_cats_rare_100": pct_cats_rare_100,
+    }
