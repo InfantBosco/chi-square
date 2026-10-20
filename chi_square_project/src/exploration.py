@@ -97,3 +97,47 @@ def analyze_and_plot_occp(df: pd.DataFrame, output_path: Path) -> Tuple[int, pd.
     plt.close()
     
     return n_unique, top_20, threshold_counts
+
+
+def analyze_and_plot_pincp(df: pd.DataFrame, output_path: Path) -> Dict[str, float]:
+    """
+    Analyzes PINCP target column:
+    - Computes min, max, mean, median, Q1 (25%), Q3 (75%)
+    - Plots distribution histogram with median and mean markers
+    - Saves plot to output_path
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    pincp = df["PINCP"]
+    
+    stats = {
+        "min": float(pincp.min()),
+        "q1": float(pincp.quantile(0.25)),
+        "median": float(pincp.median()),
+        "mean": float(pincp.mean()),
+        "q3": float(pincp.quantile(0.75)),
+        "max": float(pincp.max()),
+        "std": float(pincp.std()),
+    }
+    
+    plt.figure(figsize=(10, 6), dpi=300)
+    # Clip view to 99th percentile for clear histogram visibility while plotting
+    q99 = pincp.quantile(0.99)
+    sns.histplot(pincp[pincp <= q99], bins=60, color="#2ca02c", kde=True, edgecolor="black", alpha=0.6)
+    
+    plt.axvline(stats["median"], color="#1f77b4", linestyle="--", lw=2, label=f"Median: ${stats['median']:,.0f}")
+    plt.axvline(stats["mean"], color="#d62728", linestyle="-", lw=2, label=f"Mean: ${stats['mean']:,.0f}")
+    plt.axvline(stats["q1"], color="#ff7f0e", linestyle=":", lw=1.5, label=f"Q1 (25%): ${stats['q1']:,.0f}")
+    plt.axvline(stats["q3"], color="#9467bd", linestyle=":", lw=1.5, label=f"Q3 (75%): ${stats['q3']:,.0f}")
+    
+    plt.title("Distribution of Total Person's Income (PINCP) - CA 2018 (up to 99th percentile)", fontsize=13, fontweight="bold", pad=12)
+    plt.xlabel("Annual Income (USD)", fontsize=12)
+    plt.ylabel("Frequency (Person Count)", fontsize=12)
+    plt.gca().xaxis.set_major_formatter(plt.FuncFormatter(lambda x, loc: f"${int(x):,}"))
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.legend(frameon=True, facecolor="white", edgecolor="#cccccc")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    
+    return stats
+
