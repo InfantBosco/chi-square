@@ -97,3 +97,85 @@ def calculate_feature_sparsity_metrics(series: pd.Series) -> Dict[str, Any]:
         "pct_obs_rare_100": pct_obs_rare_100,
         "pct_cats_rare_100": pct_cats_rare_100,
     }
+
+
+def plot_top_categories(series: pd.Series, output_path: Path, top_n: int = 30):
+    """Plots horizontal bar chart of top N most frequent categories."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    vc = series.value_counts().head(top_n)
+    
+    plt.figure(figsize=(10, 8), dpi=300)
+    y_pos = np.arange(len(vc))
+    plt.barh(y_pos, vc.values, color="#1f77b4", edgecolor="black", alpha=0.85)
+    plt.yticks(y_pos, [f"Cat {int(cat)}" if isinstance(cat, (int, float)) and not np.isnan(cat) else str(cat) for cat in vc.index], fontsize=9)
+    plt.gca().invert_yaxis()
+    plt.xlabel("Observation Count (Training Set)", fontsize=11)
+    plt.ylabel(f"Category (Top {top_n})", fontsize=11)
+    plt.title(f"Top {top_n} Most Frequent Categories for {series.name}", fontsize=13, fontweight="bold", pad=12)
+    plt.grid(axis="x", linestyle="--", alpha=0.5)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
+
+def plot_frequency_distribution(series: pd.Series, output_path: Path):
+    """Plots category-frequency distribution on log scale."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    vc = series.value_counts()
+    ranks = np.arange(len(vc))
+    
+    plt.figure(figsize=(9, 5.5), dpi=300)
+    plt.plot(ranks, vc.values, color="#2ca02c", lw=2.2, label=f"{series.name} Frequency Rank")
+    plt.fill_between(ranks, vc.values, color="#2ca02c", alpha=0.2)
+    
+    plt.axhline(100, color="#d62728", linestyle="--", lw=1.2, label="Threshold = 100 observations")
+    plt.axhline(50, color="#ff7f0e", linestyle="-.", lw=1.2, label="Threshold = 50 observations")
+    plt.axhline(10, color="#9467bd", linestyle=":", lw=1.2, label="Threshold = 10 observations")
+    
+    plt.yscale("log")
+    plt.xlabel("Category Rank (Ordered by Descending Frequency)", fontsize=11)
+    plt.ylabel("Observation Count (Log Scale)", fontsize=11)
+    plt.title(f"Category Frequency Distribution for {series.name} (Zipfian Long Tail)", fontsize=13, fontweight="bold", pad=12)
+    plt.grid(True, linestyle="--", alpha=0.5, which="both")
+    plt.legend(frameon=True, facecolor="white", edgecolor="#cccccc")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
+
+def plot_cumulative_frequency(series: pd.Series, output_path: Path):
+    """Plots cumulative percentage of observations vs cumulative percentage of categories."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    vc = series.value_counts()
+    cum_obs_pct = (np.cumsum(vc.values) / len(series)) * 100
+    cum_cat_pct = ((np.arange(len(vc)) + 1) / len(vc)) * 100
+    
+    plt.figure(figsize=(9, 5.5), dpi=300)
+    plt.plot(cum_cat_pct, cum_obs_pct, color="#9467bd", lw=2.5, label="Cumulative Coverage")
+    plt.plot([0, 100], [0, 100], color="gray", linestyle="--", lw=1.2, label="Uniform Baseline")
+    
+    # Annotate Pareto points
+    idx_50 = np.searchsorted(cum_obs_pct, 50)
+    idx_80 = np.searchsorted(cum_obs_pct, 80)
+    
+    plt.scatter([cum_cat_pct[idx_50], cum_cat_pct[idx_80]], [cum_obs_pct[idx_50], cum_obs_pct[idx_80]], color="#d62728", zorder=5)
+    plt.annotate(f"50% obs covered by top {cum_cat_pct[idx_50]:.1f}% cats", 
+                 (cum_cat_pct[idx_50], cum_obs_pct[idx_50]),
+                 xytext=(cum_cat_pct[idx_50] + 5, cum_obs_pct[idx_50] - 8),
+                 arrowprops=dict(arrowstyle="->", color="#d62728"))
+    plt.annotate(f"80% obs covered by top {cum_cat_pct[idx_80]:.1f}% cats", 
+                 (cum_cat_pct[idx_80], cum_obs_pct[idx_80]),
+                 xytext=(cum_cat_pct[idx_80] + 5, cum_obs_pct[idx_80] - 8),
+                 arrowprops=dict(arrowstyle="->", color="#d62728"))
+                 
+    plt.xlabel("Cumulative Percentage of Categories (%)", fontsize=11)
+    plt.ylabel("Cumulative Percentage of Observations (%)", fontsize=11)
+    plt.title(f"Cumulative Frequency (Lorenz/Pareto) Curve for {series.name}", fontsize=13, fontweight="bold", pad=12)
+    plt.xlim(0, 100)
+    plt.ylim(0, 105)
+    plt.grid(True, linestyle="--", alpha=0.5)
+    plt.legend(frameon=True, facecolor="white", edgecolor="#cccccc", loc="lower right")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
