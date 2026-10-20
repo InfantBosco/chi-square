@@ -7,6 +7,7 @@ Description: Stratified train-test splitting utilities ensuring clean data isola
 from pathlib import Path
 from typing import Tuple, Dict, Any, List
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import train_test_split
 
 
@@ -66,3 +67,14 @@ def generate_split_summary(y_full: pd.Series, y_train: pd.Series, y_test: pd.Ser
             "Percentage of target class 1": round(float(pcts[1]), 4),
         })
     return pd.DataFrame(records)
+
+
+def verify_split_proportions(y_train: pd.Series, y_test: pd.Series, tolerance: float = 0.001) -> bool:
+    """
+    Verifies that the target proportions between train and test sets match within tolerance.
+    """
+    train_pct1 = (y_train == 1).mean()
+    test_pct1 = (y_test == 1).mean()
+    diff = abs(train_pct1 - test_pct1)
+    assert diff < tolerance, f"Target proportions mismatch: Train={train_pct1:.4f}, Test={test_pct1:.4f}, Diff={diff:.4f}"
+    return True
