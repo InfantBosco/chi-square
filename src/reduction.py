@@ -43,3 +43,36 @@ def apply_category_reduction(
         lambda x: mapping.get(x, "Rare")
     )
     return df_out
+
+
+def generate_reduction_summary(
+    orig_series: pd.Series,
+    grouped_series: pd.Series,
+    mapping: Dict[str, str]
+) -> pd.DataFrame:
+    """
+    Generates comparison summary table containing:
+    - Original number of categories
+    - Transformed number of categories
+    - Number of categories grouped as Rare
+    - Number of observations assigned to Rare
+    - Percentage of observations assigned to Rare
+    - Cardinality reduction percentage
+    """
+    n_orig_cats = int(orig_series.nunique())
+    n_trans_cats = int(grouped_series.nunique())
+    n_rare_cats = sum(1 for v in mapping.values() if v == "Rare")
+    n_rare_obs = int((grouped_series == "Rare").sum())
+    total_obs = len(grouped_series)
+    pct_rare_obs = round(float((n_rare_obs / total_obs) * 100), 4)
+    card_red_pct = round(float(((n_orig_cats - n_trans_cats) / n_orig_cats) * 100), 4)
+    
+    record = {
+        "Original number of categories": n_orig_cats,
+        "Transformed number of categories": n_trans_cats,
+        "Number of categories grouped as Rare": n_rare_cats,
+        "Number of observations assigned to Rare": n_rare_obs,
+        "Percentage of observations assigned to Rare": pct_rare_obs,
+        "Cardinality reduction percentage": card_red_pct,
+    }
+    return pd.DataFrame([record])
