@@ -1,0 +1,5 @@
+Evaluation subset,Model name,Accuracy,Precision,Recall,F1-score,ROC-AUC
+Full test set,Model A (Original),0.7968,0.7597,0.748,0.7538,0.875
+Full test set,Model B (Transformed),0.7941,0.7548,0.7477,0.7512,0.8726
+Rare or unseen test subset,Model A (Original),0.7627,0.7531,0.7315,0.7422,0.8384
+Rare or unseen test subset,Model B (Transformed),0.7239,0.701,0.7127,0.7068,0.7985
