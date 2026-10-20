@@ -1,0 +1,3 @@
+Checking Phase 1 deliverables...
+Summary columns: ['column_name', 'unique_categories', 'missing_values', 'most_frequent_category', 'frequency_most_frequent', 'categories_lt_10', 'categories_lt_50', 'categories_lt_100']
+All Phase 1 verifications passed successfully!
