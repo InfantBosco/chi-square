@@ -99,3 +99,71 @@ def build_before_after_comparison(
         }
     ]
     return pd.DataFrame(records)
+
+
+def plot_before_after_comparison(
+    comparison_df: pd.DataFrame,
+    output_path: Path
+):
+    """
+    Creates a 2x2 grid of side-by-side bar plots comparing:
+    - Number of categories
+    - Chi-square statistic
+    - Degrees of freedom
+    - Number of low expected cells
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    fig, axes = plt.subplots(2, 2, figsize=(11, 8.5), dpi=300)
+    versions = ["Baseline\n(OCCP)", "Transformed\n(OCCP_grouped)"]
+    palette = ["#d62728", "#2ca02c"]
+    
+    # 1. Number of categories
+    ax1 = axes[0, 0]
+    vals1 = comparison_df["Number of categories"].values
+    bars1 = ax1.bar(versions, vals1, color=palette, edgecolor="black", width=0.5)
+    ax1.set_title("Number of Categories", fontsize=12, fontweight="bold")
+    ax1.set_ylabel("Count", fontsize=10)
+    ax1.set_ylim(0, max(vals1) * 1.18)
+    for b, v in zip(bars1, vals1):
+        ax1.text(b.get_x() + b.get_width() / 2, v + 12, f"{int(v)}", ha="center", va="bottom", fontweight="bold")
+    ax1.grid(axis="y", linestyle="--", alpha=0.5)
+    
+    # 2. Chi-square statistic
+    ax2 = axes[0, 1]
+    vals2 = comparison_df["Chi-square statistic"].values
+    bars2 = ax2.bar(versions, vals2, color=palette, edgecolor="black", width=0.5)
+    ax2.set_title("Chi-Square Statistic ($\chi^2$)", fontsize=12, fontweight="bold")
+    ax2.set_ylabel("Statistic Value", fontsize=10)
+    ax2.set_ylim(0, max(vals2) * 1.18)
+    for b, v in zip(bars2, vals2):
+        ax2.text(b.get_x() + b.get_width() / 2, v + 1000, f"{v:,.1f}", ha="center", va="bottom", fontweight="bold")
+    ax2.grid(axis="y", linestyle="--", alpha=0.5)
+    
+    # 3. Degrees of freedom
+    ax3 = axes[1, 0]
+    vals3 = comparison_df["Degrees of freedom"].values
+    bars3 = ax3.bar(versions, vals3, color=palette, edgecolor="black", width=0.5)
+    ax3.set_title("Degrees of Freedom ($df$)", fontsize=12, fontweight="bold")
+    ax3.set_ylabel("Degrees of Freedom", fontsize=10)
+    ax3.set_ylim(0, max(vals3) * 1.18)
+    for b, v in zip(bars3, vals3):
+        ax3.text(b.get_x() + b.get_width() / 2, v + 12, f"{int(v)}", ha="center", va="bottom", fontweight="bold")
+    ax3.grid(axis="y", linestyle="--", alpha=0.5)
+    
+    # 4. Number of low expected cells (< 5)
+    ax4 = axes[1, 1]
+    vals4 = comparison_df["Number of low expected cells"].values
+    bars4 = ax4.bar(versions, vals4, color=palette, edgecolor="black", width=0.5)
+    ax4.set_title("Low Expected Cells ($E_{ij} < 5$)", fontsize=12, fontweight="bold")
+    ax4.set_ylabel("Cell Count", fontsize=10)
+    ax4.set_ylim(0, max(max(vals4), 1) * 1.25)
+    for b, v in zip(bars4, vals4):
+        ax4.text(b.get_x() + b.get_width() / 2, v + 1.2, f"{int(v)}", ha="center", va="bottom", fontweight="bold")
+    ax4.grid(axis="y", linestyle="--", alpha=0.5)
+    
+    plt.suptitle("Chi-Square Test Comparison: Baseline vs. Grouped OCCP", fontsize=14, fontweight="bold", y=0.99)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+
