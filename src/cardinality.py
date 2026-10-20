@@ -52,3 +52,10 @@ def analyze_training_cardinality(X_train: pd.DataFrame, categorical_cols: List[s
         })
         
     return pd.DataFrame(records)
+
+
+def get_high_cardinality_feature(cardinality_summary_df: pd.DataFrame) -> Tuple[str, int]:
+    """Identifies the feature with highest unique categories."""
+    sorted_df = cardinality_summary_df.sort_values(by="unique_categories", ascending=False)
+    top_row = sorted_df.iloc[0]
+    return str(top_row["column_name"]), int(top_row["unique_categories"])
