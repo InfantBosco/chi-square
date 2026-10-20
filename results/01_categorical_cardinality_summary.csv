@@ -1,0 +1,9 @@
+column_name,unique_categories,missing_values,most_frequent_category,frequency_most_frequent,categories_lt_10,categories_lt_50,categories_lt_100
+COW,8,0,1.0,127815,0,0,0
+SCHL,24,0,21.0,46526,0,0,2
+MAR,5,0,1.0,102442,0,0,0
+OCCP,529,0,440.0,5513,14,139,235
+POBP,219,0,6.0,94450,29,85,112
+RELP,18,0,0.0,90761,0,1,1
+SEX,2,0,1.0,103311,0,0,0
+RAC1P,9,0,1.0,121006,0,1,1
