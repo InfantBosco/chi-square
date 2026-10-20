@@ -62,3 +62,40 @@ def compute_transformed_contingency(
         "scipy_chi2": scipy_chi2,
     }
     return ct, expected_df, metrics
+
+
+def build_before_after_comparison(
+    baseline_results: Dict[str, Any],
+    transformed_results: Dict[str, Any]
+) -> pd.DataFrame:
+    """
+    Constructs comparison table containing:
+    - Feature version
+    - Number of categories
+    - Chi-square statistic
+    - Degrees of freedom
+    - p-value
+    - Number of low expected cells
+    - Percentage of low expected cells
+    """
+    records = [
+        {
+            "Feature version": "Baseline (OCCP)",
+            "Number of categories": int(baseline_results["Number of categories"]),
+            "Chi-square statistic": round(float(baseline_results["Chi-square statistic"]), 4),
+            "Degrees of freedom": int(baseline_results["Degrees of freedom"]),
+            "p-value": float(baseline_results["p-value"]),
+            "Number of low expected cells": int(baseline_results["Number of cells with expected count below 5"]),
+            "Percentage of low expected cells": round(float(baseline_results["Percentage of cells with expected count below 5"]), 4),
+        },
+        {
+            "Feature version": "Transformed (OCCP_grouped)",
+            "Number of categories": int(transformed_results["Number of transformed categories"]),
+            "Chi-square statistic": round(float(transformed_results["Chi-square statistic"]), 4),
+            "Degrees of freedom": int(transformed_results["Degrees of freedom"]),
+            "p-value": float(transformed_results["p-value"]),
+            "Number of low expected cells": int(transformed_results["Number of cells with expected count below 5"]),
+            "Percentage of low expected cells": round(float(transformed_results["Percentage of cells with expected count below 5"]), 4),
+        }
+    ]
+    return pd.DataFrame(records)
