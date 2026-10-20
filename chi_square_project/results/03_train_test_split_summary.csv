@@ -1,0 +1,4 @@
+Dataset name,Number of rows,Number of target class 0,Percentage of target class 0,Number of target class 1,Percentage of target class 1
+Full Dataset,192755,112610,58.4213,80145,41.5787
+Training Set,154204,90088,58.4213,64116,41.5787
+Testing Set,38551,22522,58.4213,16029,41.5787
