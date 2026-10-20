@@ -36,3 +36,33 @@ def perform_train_test_split(
         stratify=y
     )
     return X_train, X_test, y_train, y_test
+
+
+def generate_split_summary(y_full: pd.Series, y_train: pd.Series, y_test: pd.Series) -> pd.DataFrame:
+    """
+    Generates summary table containing:
+    - Dataset name
+    - Number of rows
+    - Number of target class 0
+    - Percentage of target class 0
+    - Number of target class 1
+    - Percentage of target class 1
+    """
+    records = []
+    datasets = [
+        ("Full Dataset", y_full),
+        ("Training Set", y_train),
+        ("Testing Set", y_test),
+    ]
+    for name, series in datasets:
+        counts = series.value_counts().sort_index()
+        pcts = (counts / len(series)) * 100
+        records.append({
+            "Dataset name": name,
+            "Number of rows": int(len(series)),
+            "Number of target class 0": int(counts[0]),
+            "Percentage of target class 0": round(float(pcts[0]), 4),
+            "Number of target class 1": int(counts[1]),
+            "Percentage of target class 1": round(float(pcts[1]), 4),
+        })
+    return pd.DataFrame(records)
