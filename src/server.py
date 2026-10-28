@@ -28,9 +28,9 @@ class AnalyzeRequest(BaseModel):
 
 class ScenarioRequest(BaseModel):
     product_name: str
-    country: str = 'United Kingdom'
+    country: str = 'India'
     quantity: int = 2
-    unit_price: float = 15.0
+    unit_price: float = 650.0
     threshold: int = 25
 
 @app.get("/api/health")

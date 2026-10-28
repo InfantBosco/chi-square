@@ -42,7 +42,7 @@ class RetailAnalysisEngine:
         # Clean invalid values
         df = df[df['TotalAmount'] > 0]
         
-        # High-value order target (> 75th percentile, typically ~£30 - £50)
+        # High-value order target (> 75th percentile, typically ~₹2,000)
         p75 = df['TotalAmount'].quantile(0.75)
         df['target_high_value'] = (df['TotalAmount'] >= p75).astype(int)
         
@@ -189,7 +189,7 @@ class RetailAnalysisEngine:
             }
         }
 
-    def predict_scenario(self, product_name, country='United Kingdom', quantity=2, unit_price=15.0, threshold=25):
+    def predict_scenario(self, product_name, country='India', quantity=2, unit_price=650.0, threshold=25):
         """
         Interactive Manual Entry Simulator:
         Tests an individual order scenario and contrasts how Raw AI vs Cleaned AI evaluates it.
@@ -201,7 +201,7 @@ class RetailAnalysisEngine:
         is_niche = freq < threshold
         
         order_val = round(quantity * unit_price, 2)
-        base_high_value_prob = min(98, max(5, int((order_val / 60.0) * 75)))
+        base_high_value_prob = min(98, max(5, int((order_val / 3000.0) * 75)))
         
         # Raw AI is noisy on niche products
         if is_niche:
@@ -220,7 +220,7 @@ class RetailAnalysisEngine:
                 "Both Unfiltered and Cleaned AI have ample data and agree with high statistical certainty."
             )
             
-        repeat_prob = min(92, max(15, int(45 + (order_val > 50) * 25 + (freq > 50) * 15)))
+        repeat_prob = min(92, max(15, int(45 + (order_val > 2500) * 25 + (freq > 50) * 15)))
         
         return {
             'product_name': product_name,

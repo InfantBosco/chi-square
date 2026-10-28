@@ -315,7 +315,7 @@
         <div class="flex items-center gap-2 bg-[#FAF9F5] border border-[#E2DDD3] p-1.5 rounded-md">
             <span class="text-xs font-bold text-[#8C857B] uppercase px-1">Predicting:</span>
             <button onclick="setTarget('high_value')" id="target-hv-btn" class="target-pill active">
-                High-Value Orders (> £35)
+                High-Value Orders (> ₹2,000)
             </button>
             <button onclick="setTarget('repeat_customer')" id="target-rc-btn" class="target-pill">
                 Repeat Customer Retention
@@ -578,9 +578,9 @@
                         <!-- Input 3: Unit Price -->
                         <div>
                             <label class="block text-xs font-bold text-[#1C1917] uppercase mb-1.5">
-                                Unit Price (£)
+                                Unit Price (₹)
                             </label>
-                            <input type="number" id="simPrice" min="0.5" step="0.5" value="8.50" class="w-full p-2.5 text-xs bg-[#FAF9F5] border border-[#E2DDD3] rounded text-[#1C1917] focus:border-[#1C1917] outline-none">
+                            <input type="number" id="simPrice" min="10" step="50" value="650.00" class="w-full p-2.5 text-xs bg-[#FAF9F5] border border-[#E2DDD3] rounded text-[#1C1917] focus:border-[#1C1917] outline-none">
                         </div>
 
                     </div>
@@ -639,7 +639,10 @@
 
                         <!-- Plain English Executive Reason -->
                         <div class="p-4 bg-[#FAF9F5] border border-[#E2DDD3] rounded">
-                            <span class="text-xs font-bold text-[#8C857B] uppercase">AUDITOR'S DECISION EXPLANATION</span>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-[#8C857B] uppercase">AUDITOR'S DECISION EXPLANATION</span>
+                                <span class="font-mono text-xs font-bold text-[#1C1917]" id="simOrderValue">Order: ₹2,600</span>
+                            </div>
                             <p class="text-xs text-[#1C1917] mt-1 leading-relaxed font-medium" id="resExplanation">
                                 Loading scenario explanation...
                             </p>
@@ -861,11 +864,11 @@
             if (type === 'common') {
                 document.getElementById('simProduct').value = sampleCommonProduct;
                 document.getElementById('simQty').value = 4;
-                document.getElementById('simPrice').value = 8.50;
+                document.getElementById('simPrice').value = 650.00;
             } else {
                 document.getElementById('simProduct').value = sampleNicheProduct;
                 document.getElementById('simQty').value = 1;
-                document.getElementById('simPrice').value = 14.00;
+                document.getElementById('simPrice').value = 1250.00;
             }
             runScenarioPrediction();
         }
@@ -874,7 +877,7 @@
         async function runScenarioPrediction() {
             const prod = document.getElementById('simProduct').value;
             const qty = parseInt(document.getElementById('simQty').value) || 1;
-            const price = parseFloat(document.getElementById('simPrice').value) || 10.0;
+            const price = parseFloat(document.getElementById('simPrice').value) || 650.0;
 
             try {
                 const res = await fetch('/api/predict-scenario', {
@@ -890,6 +893,12 @@
                 const json = await res.json();
                 if (json.status === 'success') {
                     const pred = json.data;
+                    const orderFormatted = Number(pred.order_value).toLocaleString('en-IN');
+                    const orderValEl = document.getElementById('simOrderValue');
+                    if (orderValEl) {
+                        orderValEl.innerText = `Order: ₹${orderFormatted}`;
+                    }
+
                     document.getElementById('resProbA').innerText = `${pred.model_a_prediction.high_value_probability}%`;
                     document.getElementById('resVerdictA').innerText = pred.model_a_prediction.verdict;
                     document.getElementById('resBarA').style.width = `${pred.model_a_prediction.high_value_probability}%`;
