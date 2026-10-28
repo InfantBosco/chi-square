@@ -16,14 +16,22 @@ class RetailAnalysisEngine:
     def __init__(self, csv_path=None):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         if csv_path is None:
-            csv_path = os.path.join(base_dir, 'data', 'processed', 'online_retail_demo.csv')
-            if not os.path.exists(csv_path):
-                csv_path = os.path.join(os.getcwd(), 'data', 'processed', 'online_retail_demo.csv')
-            if not os.path.exists(csv_path):
-                csv_path = os.path.join(base_dir, 'data', 'raw', 'online_retail.csv')
+            candidates = [
+                os.path.join(base_dir, 'data', 'processed', 'online_retail_demo.csv'),
+                os.path.join(base_dir, 'api', 'online_retail_demo.csv'),
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'api', 'online_retail_demo.csv'),
+                os.path.join(os.getcwd(), 'data', 'processed', 'online_retail_demo.csv'),
+                os.path.join(os.getcwd(), 'api', 'online_retail_demo.csv'),
+                os.path.join(base_dir, 'data', 'raw', 'online_retail.csv'),
+            ]
+            for c in candidates:
+                if os.path.exists(c):
+                    csv_path = c
+                    break
         self.csv_path = csv_path
         self.df = None
-        self.load_data(self.csv_path)
+        if self.csv_path and os.path.exists(self.csv_path):
+            self.load_data(self.csv_path)
 
     def load_data(self, path):
         df = pd.read_csv(path)

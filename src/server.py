@@ -42,8 +42,11 @@ def get_index():
     for candidate in [
         os.path.join(STATIC_DIR, "index.html"),
         os.path.join(PUBLIC_DIR, "index.html"),
+        os.path.join(BASE_DIR, "api", "index.html"),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "api", "index.html"),
         os.path.join(os.getcwd(), "static", "index.html"),
         os.path.join(os.getcwd(), "public", "index.html"),
+        os.path.join(os.getcwd(), "api", "index.html"),
     ]:
         if os.path.exists(candidate):
             with open(candidate, "r", encoding="utf-8") as f:
@@ -52,10 +55,20 @@ def get_index():
 
 @app.get("/api/load-demo")
 def load_demo():
-    demo_path = os.path.join(BASE_DIR, 'data', 'processed', 'online_retail_demo.csv')
-    if not os.path.exists(demo_path):
-        demo_path = os.path.join(os.getcwd(), 'data', 'processed', 'online_retail_demo.csv')
-    ENGINE.load_data(demo_path)
+    demo_candidates = [
+        os.path.join(BASE_DIR, 'data', 'processed', 'online_retail_demo.csv'),
+        os.path.join(BASE_DIR, 'api', 'online_retail_demo.csv'),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'api', 'online_retail_demo.csv'),
+        os.path.join(os.getcwd(), 'data', 'processed', 'online_retail_demo.csv'),
+        os.path.join(os.getcwd(), 'api', 'online_retail_demo.csv'),
+    ]
+    demo_path = None
+    for c in demo_candidates:
+        if os.path.exists(c):
+            demo_path = c
+            break
+    if demo_path:
+        ENGINE.load_data(demo_path)
     res = ENGINE.run_analysis(target_type='high_value', feature_col='Description', threshold=25)
     return {"status": "success", "message": "Official UCI Online Retail Demo Loaded", "data": res}
 

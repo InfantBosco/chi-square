@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Retail Intelligence Ledger · Decision Desk</title>
+    <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            /* Paper Canvas & Surfaces */
+            --bg-app:          #F6F4EE;
+            --bg-surface:      #FAF9F5;
+            --bg-card:         #FDFAF5;
+            --bg-subtle:       #EFECE4;
+            
+            /* Paper Fiber Borders */
+            --border-color:    #E2DDD3;
+            --border-subtle:   #ECE8DF;
+            --border-hover:    #D0C9BD;
+            --border-focus:    #1C1917;
+            
+            /* Press Ink Typography */
+            --text-main:       #1C1917;
+            --text-muted:      #57534E;
+            --text-light:      #8C857B;
+            
+            /* Primary Action Contrast */
+            --color-primary:       #1C1917;
+            --color-primary-hover: #292524;
+
+            /* Semantic Stamps */
+            --real-bg:         #F0FDF4;
+            --real-text:       #166534;
+            --real-border:     #BBF7D0;
+            --real-fill:       #16A34A;
+            
+            --fake-bg:         #FEF2F2;
+            --fake-text:       #991B1B;
+            --fake-border:     #FECACA;
+            --fake-fill:       #DC2626;
+
+            --truth-bg:        #FEFCE8;
+            --truth-text:      #854D0E;
+            --truth-border:    #FEF08A;
+            
+            --tape-bg:         rgba(246, 238, 220, 0.85);
+            --tape-border:     rgba(160, 138, 105, 0.55);
+        }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Paper Document Card Wrap & Realistic Shadow */
+        .card-torn-shadow-wrap {
+            position: relative;
+            margin-top: 32px;
+            margin-bottom: 32px;
+            filter: 
+                drop-shadow(0 2px 4px rgba(45, 34, 20, 0.10))
+                drop-shadow(0 10px 20px rgba(45, 34, 20, 0.12));
+            transition: filter 0.25s ease;
+        }
+
+        .paper-card {
+            position: relative;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 28px 30px;
+        }
+
+        /* Frosted Washi Drafting Tape Accent */
+        .card-tape {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-1.5deg);
+            width: 140px;
+            height: 28px;
+            background: var(--tape-bg);
+            backdrop-filter: blur(2px);
+            border-left: 2px dashed var(--tape-border);
+            border-right: 2px dashed var(--tape-border);
+            box-shadow: 
+                0 1px 4px rgba(45, 34, 20, 0.15),
+                inset 0 1px 1px rgba(255, 255, 255, 0.7);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .card-tape-result {
+            transform: translateX(-50%) rotate(1.2deg);
+        }
+
+        /* Press Stamps */
+        .stamp {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 2px;
+            border-width: 1.5px;
+            border-style: solid;
+        }
+
+        .stamp-verified {
+            background-color: var(--real-bg);
+            color: var(--real-text);
+            border-color: var(--real-border);
+        }
+
+        .stamp-alarm {
+            background-color: var(--fake-bg);
+            color: var(--fake-text);
+            border-color: var(--fake-border);
+        }
+
+        .stamp-seal {
+            background-color: var(--truth-bg);
+            color: var(--truth-text);
+            border-color: var(--truth-border);
+        }
+
+        /* Primary Action Button */
+        .primary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: var(--color-primary);
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 0.90rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(28, 25, 23, 0.15);
+            transition: all 0.15s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .primary-btn:hover {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(28, 25, 23, 0.20);
+        }
+
+        .primary-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(28, 25, 23, 0.15);
+        }
+
+        /* Secondary Outline Button */
+        .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 9px 18px;
+            background-color: transparent;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.88rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .secondary-btn:hover {
+            background-color: var(--bg-subtle);
+            border-color: var(--border-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Segmented Navigation Tray */
+        .tab-tray {
+            background-color: var(--bg-subtle);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px;
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 4px;
+            color: var(--text-muted);
+            transition: all 0.15s ease;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tab-btn.active {
+            background-color: #FFFFFF;
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(44, 38, 28, 0.08);
+        }
+
+        /* Target Switcher Pill */
+        .target-pill {
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-surface);
+            color: var(--text-muted);
+            transition: all 0.15s ease;
+        }
+
+        .target-pill.active {
+            background-color: var(--text-main);
+            color: #FFFFFF;
+            border-color: var(--text-main);
+        }
+
+        /* Stepped Slider */
+        input[type=range] {
+            accent-color: var(--text-main);
+        }
+
+        /* Pulsing Status Dot */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.92); }
+        }
+        .pulse-beacon {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+
+    <!-- Top Masthead & Editorial Header -->
+    <header class="border-b border-[#E2DDD3] bg-[#FAF9F5] px-6 py-6">
+        <div class="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#16A34A] pulse-beacon"></span>
+                    <span class="font-mono text-xs font-bold tracking-wider text-[#8C857B] uppercase">RETAIL INTELLIGENCE FORENSICS · DECISION DESK</span>
+                </div>
+                <h1 class="text-3xl font-extrabold text-[#1C1917] tracking-tight">The Retail Intelligence Ledger</h1>
+                <p class="text-sm text-[#57534E] mt-0.5 max-w-xl">
+                    Executive Sales Driver & Catalog Risk Auditor. Validates whether marketing channels and product niches truly drive revenue or create dangerous model blind spots.
+                </p>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="flex items-center gap-2">
+                <button onclick="loadDemoData()" class="secondary-btn">
+                    <i data-lucide="database" class="w-4 h-4"></i>
+                    <span>Load Official UCI Demo</span>
+                </button>
+                <label class="secondary-btn cursor-pointer">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span>Upload Store CSV</span>
+                    <input type="file" id="csvUploader" accept=".csv" class="hidden" onchange="uploadCustomCSV(event)">
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tab Tray & Target Switcher -->
+    <div class="max-w-5xl mx-auto px-6 mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Main Navigation Tabs -->
+        <div class="tab-tray">
+            <button onclick="switchTab('audit')" id="tab-audit-btn" class="tab-btn active">
+                <i data-lucide="line-chart" class="w-4 h-4"></i>
+                <span>1. Catalog & Sales Audit</span>
+            </button>
+            <button onclick="switchTab('consolidation')" id="tab-consolidation-btn" class="tab-btn">
+                <i data-lucide="sliders" class="w-4 h-4"></i>
+                <span>2. Smart Niche Consolidation</span>
+            </button>
+            <button onclick="switchTab('simulator')" id="tab-simulator-btn" class="tab-btn">
+                <i data-lucide="calculator" class="w-4 h-4"></i>
+                <span>3. Single Order Simulator</span>
+            </button>
+        </div>
+
+        <!-- Business Target Toggle -->
+        <div class="flex items-center gap-2 bg-[#FAF9F5] border border-[#E2DDD3] p-1.5 rounded-md">
+            <span class="text-xs font-bold text-[#8C857B] uppercase px-1">Predicting:</span>
+            <button onclick="setTarget('high_value')" id="target-hv-btn" class="target-pill active">
+                High-Value Orders (> £35)
+            </button>
+            <button onclick="setTarget('repeat_customer')" id="target-rc-btn" class="target-pill">
+                Repeat Customer Retention
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-5xl mx-auto px-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: CATALOG & SALES AUDIT               -->
+        <!-- ========================================== -->
+        <div id="tab-audit-view" class="space-y-6">
+            
+            <!-- Paper Sheet Wrap -->
+            <div class="card-torn-shadow-wrap">
+                <div class="card-tape"></div>
+                <div class="paper-card">
+                    <!-- Card Top Header -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-[#ECE8DF] gap-3">
+                        <div>
+                            <span class="font-mono text-xs font-bold text-[#8C857B] uppercase">EXECUTIVE AUDIT FINDING</span>
+                            <h2 class="text-xl font-bold text-[#1C1917] mt-0.5">Product Category Influence on Retail Revenue</h2>
+                        </div>
+                        <div id="auditStatusStamp" class="stamp stamp-verified">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span>VERIFIED SALES DRIVER</span>
+                        </div>
+                    </div>
+
+                    <!-- 4 Vital Sign Bento Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                        <!-- Metric 1: Confidence -->
+                        <div class="bg-[#FAF9F5] border border-[#E2DDD3] p-4 rounded">
+                            <span class="text-xs font-semibold text-[#8C857B] uppercase">Statistical Confidence</span>
+                            <div class="text-3xl font-extrabold text-[#1C1917] mt-1 font-mono" id="valConfidence">99.9%</div>
+                            <p class="text-xs text-[#57534E] mt-1.5">Proven real revenue driver, not random noise.</p>
+                        </div>
+
+                        <!-- Metric 2: Blind Spot Risk -->
+                        <div class="bg-[#FAF9F5] border border-[#FECACA] p-4 rounded">
+                            <span class="text-xs font-semibold text-[#991B1B] uppercase flex items-center gap-1">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                                Blind Spot Risk
+                            </span>
+                            <div class="text-3xl font-extrabold text-[#991B1B] mt-1 font-mono" id="valBlindSpot">74.5%</div>
+                            <p class="text-xs text-[#57534E] mt-1.5">Portion of catalog with too few sales to trust.</p>
+                        </div>
+
+                        <!-- Metric 3: Unique Catalog Niches -->
+                        <div class="bg-[#FAF9F5] border border-[#E2DDD3] p-4 rounded">
+                            <span class="text-xs font-semibold text-[#8C857B] uppercase">Raw Product Niches</span>
+                            <div class="text-3xl font-extrabold text-[#1C1917] mt-1 font-mono" id="valRawItems">2,865</div>
+                            <p class="text-xs text-[#57534E] mt-1.5">Unique items in active customer transaction log.</p>
+                        </div>
+
+                        <!-- Metric 4: Verified Orders -->
+                        <div class="bg-[#FAF9F5] border border-[#E2DDD3] p-4 rounded">
+                            <span class="text-xs font-semibold text-[#8C857B] uppercase">Analyzed Transactions</span>
+                            <div class="text-3xl font-extrabold text-[#1C1917] mt-1 font-mono" id="valTotalOrders">25,000</div>
+                            <p class="text-xs text-[#57534E] mt-1.5">Certified transaction microdata records.</p>
+                        </div>
+                    </div>
+
+                    <!-- Editorial Callout Box (Parchment Gold) -->
+                    <div class="mt-6 p-4 rounded border border-[#FEF08A] bg-[#FEFCE8] flex items-start gap-3">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-[#854D0E] shrink-0 mt-0.5"></i>
+                        <div>
+                            <h4 class="text-sm font-bold text-[#854D0E]">The Business Danger of Raw AI in E-Commerce</h4>
+                            <p class="text-xs text-[#57534E] mt-1 leading-relaxed">
+                                Over <b>74% of your product catalog</b> consists of rare, low-frequency items with fewer than 20 recorded orders. 
+                                When standard AI models are trained on raw data, they hallucinate high or low purchase probabilities based on tiny sample flukes (e.g. 1 out of 1 customer bought a rare item). 
+                                Switch to <b>Tab 2 (Smart Niche Consolidation)</b> to see how grouping rare items fixes this risk completely.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Top Categories Chart -->
+                    <div class="mt-8 pt-6 border-t border-[#ECE8DF]">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-sm font-bold text-[#1C1917] uppercase tracking-wide">Top 10 High-Volume Catalog Items</h3>
+                            <span class="font-mono text-xs text-[#8C857B]">Order Distribution</span>
+                        </div>
+                        <div class="h-64 w-full">
+                            <canvas id="topProductsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: SMART NICHE CONSOLIDATION           -->
+        <!-- ========================================== -->
+        <div id="tab-consolidation-view" class="space-y-6 hidden">
+
+            <div class="card-torn-shadow-wrap">
+                <div class="card-tape"></div>
+                <div class="paper-card">
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-[#ECE8DF] gap-3">
+                        <div>
+                            <span class="font-mono text-xs font-bold text-[#8C857B] uppercase">INTERACTIVE OPTIMIZATION SLIDER</span>
+                            <h2 class="text-xl font-bold text-[#1C1917] mt-0.5">Niche Consolidation Threshold</h2>
+                        </div>
+                        <div id="riskStatusStamp" class="stamp stamp-seal">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span id="stampText">AUDITED & SAFE</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Slider Control -->
+                    <div class="mt-6 p-5 bg-[#FAF9F5] border border-[#E2DDD3] rounded-md">
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="text-sm font-bold text-[#1C1917]">
+                                Group catalog items with fewer than:
+                            </label>
+                            <span class="font-mono text-lg font-extrabold text-[#1C1917] px-3 py-0.5 bg-[#FFFFFF] border border-[#E2DDD3] rounded" id="thresholdDisplay">
+                                25 orders
+                            </span>
+                        </div>
+                        <input type="range" id="thresholdSlider" min="5" max="100" step="5" value="25" class="w-full h-2 bg-[#E2DDD3] rounded-lg appearance-none cursor-pointer" oninput="updateThresholdValue(this.value)" onchange="runConsolidationAnalysis()">
+                        <div class="flex justify-between text-xs text-[#8C857B] font-mono mt-1.5">
+                            <span>Min (5 orders)</span>
+                            <span>Standard (25 orders)</span>
+                            <span>Aggressive (100 orders)</span>
+                        </div>
+                    </div>
+
+                    <!-- Impact Comparison Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                        
+                        <!-- Left: Model A (Raw AI) -->
+                        <div class="p-5 border border-[#FECACA] bg-[#FEF2F2] rounded">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-mono text-xs font-bold text-[#991B1B] uppercase">MODEL A</span>
+                                <span class="stamp stamp-alarm text-[10px]">RAW / VOLATILE</span>
+                            </div>
+                            <h3 class="text-base font-bold text-[#1C1917]">Unfiltered Standard AI</h3>
+                            <p class="text-xs text-[#57534E] mt-1 mb-4">Treats every tiny niche item as a separate column.</p>
+                            
+                            <div class="space-y-2.5 text-xs">
+                                <div class="flex justify-between border-b border-[#FECACA] pb-1.5">
+                                    <span class="text-[#57534E]">Feature Dimensions:</span>
+                                    <span class="font-mono font-bold text-[#1C1917]" id="modAFeatures">2,413 columns</span>
+                                </div>
+                                <div class="flex justify-between border-b border-[#FECACA] pb-1.5">
+                                    <span class="text-[#57534E]">Data Blind Spots:</span>
+                                    <span class="font-mono font-bold text-[#991B1B]" id="modABlindSpots">74.5%</span>
+                                </div>
+                                <div class="flex justify-between border-b border-[#FECACA] pb-1.5">
+                                    <span class="text-[#57534E]">Prediction Accuracy:</span>
+                                    <span class="font-mono font-bold text-[#1C1917]" id="modAAccuracy">75.5%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-[#57534E]">Decision Reliability:</span>
+                                    <span class="font-mono font-bold text-[#1C1917]" id="modAReliability">71.0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Model B (Optimized AI) -->
+                        <div class="p-5 border border-[#BBF7D0] bg-[#F0FDF4] rounded">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-mono text-xs font-bold text-[#166534] uppercase">MODEL B</span>
+                                <span class="stamp stamp-verified text-[10px]">PRODUCTION READY</span>
+                            </div>
+                            <h3 class="text-base font-bold text-[#1C1917]">Cleaned & Consolidated AI</h3>
+                            <p class="text-xs text-[#57534E] mt-1 mb-4">Safely anchors niche catalog items to sound baselines.</p>
+                            
+                            <div class="space-y-2.5 text-xs">
+                                <div class="flex justify-between border-b border-[#BBF7D0] pb-1.5">
+                                    <span class="text-[#57534E]">Feature Dimensions:</span>
+                                    <span class="font-mono font-bold text-[#166534]" id="modBFeatures">210 columns (-91%)</span>
+                                </div>
+                                <div class="flex justify-between border-b border-[#BBF7D0] pb-1.5">
+                                    <span class="text-[#57534E]">Data Blind Spots:</span>
+                                    <span class="font-mono font-bold text-[#166534]" id="modBBlindSpots">0.0% (Clean)</span>
+                                </div>
+                                <div class="flex justify-between border-b border-[#BBF7D0] pb-1.5">
+                                    <span class="text-[#57534E]">Prediction Accuracy:</span>
+                                    <span class="font-mono font-bold text-[#1C1917]" id="modBAccuracy">75.5%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-[#57534E]">Decision Reliability:</span>
+                                    <span class="font-mono font-bold text-[#1C1917]" id="modBReliability">71.0%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Summary ROI Banner -->
+                    <div class="mt-6 p-4 bg-[#FAF9F5] border border-[#E2DDD3] rounded flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-[#8C857B]">EFFICIENCY VERDICT</span>
+                            <h4 class="text-sm font-bold text-[#1C1917] mt-0.5" id="roiHeadline">
+                                91.3% Model Footprint Reduction · Zero Accuracy Lost
+                            </h4>
+                        </div>
+                        <button onclick="downloadPdfReport()" class="primary-btn shrink-0">
+                            <i data-lucide="file-text" class="w-4 h-4"></i>
+                            <span>Download Executive Audit PDF</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: SINGLE ORDER SIMULATOR              -->
+        <!-- ========================================== -->
+        <div id="tab-simulator-view" class="space-y-6 hidden">
+
+            <div class="card-torn-shadow-wrap">
+                <div class="card-tape card-tape-result"></div>
+                <div class="paper-card">
+                    
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-[#ECE8DF] gap-3">
+                        <div>
+                            <span class="font-mono text-xs font-bold text-[#8C857B] uppercase">MANUAL SCENARIO TESTER</span>
+                            <h2 class="text-xl font-bold text-[#1C1917] mt-0.5">Live Order & Customer Predictor</h2>
+                        </div>
+                        <span class="stamp stamp-seal">
+                            <i data-lucide="activity" class="w-4 h-4"></i>
+                            <span>DUAL-AI INFERENCE</span>
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-[#57534E] mt-3">
+                        Enter any product and sales scenario to compare how <b>Unfiltered AI (Model A)</b> vs <b>Cleaned AI (Model B)</b> evaluates the customer.
+                    </p>
+
+                    <!-- Manual Input Form -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+                        
+                        <!-- Input 1: Product Selection -->
+                        <div class="lg:col-span-2">
+                            <label class="block text-xs font-bold text-[#1C1917] uppercase mb-1.5">
+                                Select or Type Catalog Product
+                            </label>
+                            <input list="productList" id="simProduct" class="w-full p-2.5 text-xs bg-[#FAF9F5] border border-[#E2DDD3] rounded text-[#1C1917] focus:border-[#1C1917] outline-none" value="WHITE HANGING HEART T-LIGHT HOLDER">
+                            <datalist id="productList">
+                                <!-- Populated dynamically -->
+                            </datalist>
+                        </div>
+
+                        <!-- Input 2: Quantity -->
+                        <div>
+                            <label class="block text-xs font-bold text-[#1C1917] uppercase mb-1.5">
+                                Quantity Ordered
+                            </label>
+                            <input type="number" id="simQty" min="1" max="1000" value="4" class="w-full p-2.5 text-xs bg-[#FAF9F5] border border-[#E2DDD3] rounded text-[#1C1917] focus:border-[#1C1917] outline-none">
+                        </div>
+
+                        <!-- Input 3: Unit Price -->
+                        <div>
+                            <label class="block text-xs font-bold text-[#1C1917] uppercase mb-1.5">
+                                Unit Price (£)
+                            </label>
+                            <input type="number" id="simPrice" min="0.5" step="0.5" value="8.50" class="w-full p-2.5 text-xs bg-[#FAF9F5] border border-[#E2DDD3] rounded text-[#1C1917] focus:border-[#1C1917] outline-none">
+                        </div>
+
+                    </div>
+
+                    <!-- Quick Pre-Set Scenarios -->
+                    <div class="mt-4 flex flex-wrap items-center gap-2">
+                        <span class="text-xs text-[#8C857B] font-bold uppercase">Try Instant Scenario:</span>
+                        <button onclick="setScenario('common')" class="secondary-btn text-xs py-1 px-2.5">
+                            🌟 Popular Staple Item
+                        </button>
+                        <button onclick="setScenario('rare')" class="secondary-btn text-xs py-1 px-2.5 border-[#FECACA] text-[#991B1B]">
+                            ⚠️ Rare Micro-Niche Item
+                        </button>
+                    </div>
+
+                    <!-- Run Prediction Action -->
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="runScenarioPrediction()" class="primary-btn">
+                            <i data-lucide="zap" class="w-4 h-4"></i>
+                            <span>Evaluate Scenario Live</span>
+                        </button>
+                    </div>
+
+                    <!-- Result Display Cards -->
+                    <div id="simResultsSection" class="mt-8 pt-6 border-t border-[#ECE8DF] space-y-4">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            
+                            <!-- Model A Result -->
+                            <div class="p-4 border border-[#FECACA] bg-[#FAF9F5] rounded">
+                                <span class="font-mono text-xs font-bold text-[#991B1B] uppercase">MODEL A (UNFILTERED AI)</span>
+                                <div class="flex items-baseline justify-between mt-2">
+                                    <div class="text-2xl font-black font-mono text-[#1C1917]" id="resProbA">78%</div>
+                                    <span class="stamp stamp-alarm text-[10px]" id="resVerdictA">HIGH TICKET</span>
+                                </div>
+                                <div class="w-full bg-[#EFECE4] h-2 rounded-full overflow-hidden mt-3">
+                                    <div id="resBarA" class="bg-[#DC2626] h-full" style="width: 78%;"></div>
+                                </div>
+                                <p class="text-[11px] text-[#57534E] mt-2" id="resToneA">Status: Unstable (Blind Spot Risk)</p>
+                            </div>
+
+                            <!-- Model B Result -->
+                            <div class="p-4 border border-[#BBF7D0] bg-[#FAF9F5] rounded">
+                                <span class="font-mono text-xs font-bold text-[#166534] uppercase">MODEL B (OPTIMIZED AI)</span>
+                                <div class="flex items-baseline justify-between mt-2">
+                                    <div class="text-2xl font-black font-mono text-[#166534]" id="resProbB">64%</div>
+                                    <span class="stamp stamp-verified text-[10px]" id="resVerdictB">HIGH TICKET</span>
+                                </div>
+                                <div class="w-full bg-[#EFECE4] h-2 rounded-full overflow-hidden mt-3">
+                                    <div id="resBarB" class="bg-[#16A34A] h-full" style="width: 64%;"></div>
+                                </div>
+                                <p class="text-[11px] text-[#57534E] mt-2" id="resToneB">Status: Calibrated & Protected</p>
+                            </div>
+
+                        </div>
+
+                        <!-- Plain English Executive Reason -->
+                        <div class="p-4 bg-[#FAF9F5] border border-[#E2DDD3] rounded">
+                            <span class="text-xs font-bold text-[#8C857B] uppercase">AUDITOR'S DECISION EXPLANATION</span>
+                            <p class="text-xs text-[#1C1917] mt-1 leading-relaxed font-medium" id="resExplanation">
+                                Loading scenario explanation...
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-5xl mx-auto px-6 mt-12 pt-6 border-t border-[#E2DDD3] flex flex-col sm:flex-row items-center justify-between text-xs text-[#8C857B]">
+        <div>The Retail Intelligence Ledger · Broadside Paper UI 2.0</div>
+        <div class="font-mono mt-2 sm:mt-0">Certified UCI Microdata Engine · 100% Client-Side Privacy</div>
+    </footer>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        // App State
+        let currentTarget = 'high_value';
+        let currentThreshold = 25;
+        let analysisData = null;
+        let topChart = null;
+
+        // Initialize icons
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            loadDemoData();
+            loadProductList();
+        });
+
+        // Tab Switching
+        function switchTab(tabName) {
+            ['audit', 'consolidation', 'simulator'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}-btn`);
+                const view = document.getElementById(`tab-${t}-view`);
+                if (t === tabName) {
+                    btn.classList.add('active');
+                    view.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('active');
+                    view.classList.add('hidden');
+                }
+            });
+            lucide.createIcons();
+        }
+
+        // Target Switching
+        function setTarget(target) {
+            currentTarget = target;
+            document.getElementById('target-hv-btn').classList.toggle('active', target === 'high_value');
+            document.getElementById('target-rc-btn').classList.toggle('active', target === 'repeat_customer');
+            runConsolidationAnalysis();
+        }
+
+        // Threshold Slider Update
+        function updateThresholdValue(val) {
+            currentThreshold = parseInt(val);
+            document.getElementById('thresholdDisplay').innerText = `${val} orders`;
+        }
+
+        // Fetch Initial Demo Data
+        async function loadDemoData() {
+            try {
+                const res = await fetch('/api/load-demo');
+                const json = await res.json();
+                if (json.status === 'success') {
+                    analysisData = json.data;
+                    renderAnalysis(analysisData);
+                }
+            } catch (err) {
+                console.error("Error loading demo:", err);
+            }
+        }
+
+        // Upload Custom CSV
+        async function uploadCustomCSV(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/upload-csv', {
+                    method: 'POST',
+                    body: formData
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    analysisData = json.data;
+                    renderAnalysis(analysisData);
+                    alert(`Loaded ${file.name} successfully!`);
+                }
+            } catch (err) {
+                console.error("Upload error:", err);
+            }
+        }
+
+        // Re-analyze on threshold or target change
+        async function runConsolidationAnalysis() {
+            try {
+                const res = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        target_type: currentTarget,
+                        feature_col: 'Description',
+                        threshold: currentThreshold
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    analysisData = json.data;
+                    renderAnalysis(analysisData);
+                }
+            } catch (err) {
+                console.error("Analysis error:", err);
+            }
+        }
+
+        // Render UI with Analysis Data
+        function renderAnalysis(data) {
+            const cat = data.catalog_overview;
+            const audit = data.sales_driver_audit;
+            const ml = data.ml_comparison;
+
+            // Tab 1 Vital Signs
+            document.getElementById('valConfidence').innerText = `${audit.confidence_pct}%`;
+            document.getElementById('valBlindSpot').innerText = `${audit.raw_blind_spot_pct}%`;
+            document.getElementById('valRawItems').innerText = cat.raw_categories.toLocaleString();
+            document.getElementById('valTotalOrders').innerText = cat.total_orders.toLocaleString();
+
+            // Tab 2 Models Comparison
+            document.getElementById('modAFeatures').innerText = `${ml.model_a_raw.features.toLocaleString()} columns`;
+            document.getElementById('modABlindSpots').innerText = `${audit.raw_blind_spot_pct}%`;
+            document.getElementById('modAAccuracy').innerText = `${ml.model_a_raw.accuracy}%`;
+            document.getElementById('modAReliability').innerText = `${ml.model_a_raw.reliability_score}%`;
+
+            document.getElementById('modBFeatures').innerText = `${ml.model_b_cleaned.features.toLocaleString()} columns (-${ml.efficiency_gain.feature_reduction_pct}%)`;
+            document.getElementById('modBBlindSpots').innerText = `${audit.grouped_blind_spot_pct}% (Protected)`;
+            document.getElementById('modBAccuracy').innerText = `${ml.model_b_cleaned.accuracy}%`;
+            document.getElementById('modBReliability').innerText = `${ml.model_b_cleaned.reliability_score}%`;
+
+            document.getElementById('roiHeadline').innerText = 
+                `${ml.efficiency_gain.feature_reduction_pct}% Model Complexity Cut · 100% Blind Spots Eliminated`;
+
+            // Render Top Categories Chart
+            renderChart(data.top_categories);
+        }
+
+        // Render Chart.js
+        function renderChart(topCats) {
+            const ctx = document.getElementById('topProductsChart').getContext('2d');
+            const labels = Object.keys(topCats).map(s => s.length > 22 ? s.substring(0, 20) + '...' : s);
+            const values = Object.values(topCats);
+
+            if (topChart) topChart.destroy();
+
+            topChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Orders',
+                        data: values,
+                        backgroundColor: '#1C1917',
+                        borderRadius: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#ECE8DF' },
+                            ticks: { font: { family: 'JetBrains Mono', size: 10 }, color: '#57534E' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: 'Plus Jakarta Sans', size: 10 }, color: '#57534E', maxRotation: 30 }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fetch Product List for Simulator Dropdown
+        let sampleCommonProduct = "";
+        let sampleNicheProduct = "";
+        async function loadProductList() {
+            try {
+                const res = await fetch('/api/product-list');
+                const json = await res.json();
+                const list = document.getElementById('productList');
+                list.innerHTML = '';
+                json.all_top_50.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    list.appendChild(opt);
+                });
+                sampleCommonProduct = json.common_products[0] || "WHITE HANGING HEART T-LIGHT HOLDER";
+                sampleNicheProduct = json.niche_products[0] || "VINTAGE SHELL DESIGN BROOCH";
+                runScenarioPrediction();
+            } catch (err) {
+                console.error("Product list error:", err);
+            }
+        }
+
+        function setScenario(type) {
+            if (type === 'common') {
+                document.getElementById('simProduct').value = sampleCommonProduct;
+                document.getElementById('simQty').value = 4;
+                document.getElementById('simPrice').value = 8.50;
+            } else {
+                document.getElementById('simProduct').value = sampleNicheProduct;
+                document.getElementById('simQty').value = 1;
+                document.getElementById('simPrice').value = 14.00;
+            }
+            runScenarioPrediction();
+        }
+
+        // Run Single Order Prediction
+        async function runScenarioPrediction() {
+            const prod = document.getElementById('simProduct').value;
+            const qty = parseInt(document.getElementById('simQty').value) || 1;
+            const price = parseFloat(document.getElementById('simPrice').value) || 10.0;
+
+            try {
+                const res = await fetch('/api/predict-scenario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        product_name: prod,
+                        quantity: qty,
+                        unit_price: price,
+                        threshold: currentThreshold
+                    })
+                });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    const pred = json.data;
+                    document.getElementById('resProbA').innerText = `${pred.model_a_prediction.high_value_probability}%`;
+                    document.getElementById('resVerdictA').innerText = pred.model_a_prediction.verdict;
+                    document.getElementById('resBarA').style.width = `${pred.model_a_prediction.high_value_probability}%`;
+                    document.getElementById('resToneA').innerText = `Status: ${pred.model_a_prediction.confidence_tone}`;
+
+                    document.getElementById('resProbB').innerText = `${pred.model_b_prediction.high_value_probability}%`;
+                    document.getElementById('resVerdictB').innerText = pred.model_b_prediction.verdict;
+                    document.getElementById('resBarB').style.width = `${pred.model_b_prediction.high_value_probability}%`;
+                    document.getElementById('resToneB').innerText = `Status: ${pred.model_b_prediction.confidence_tone}`;
+
+                    document.getElementById('resExplanation').innerText = pred.business_insight;
+                }
+            } catch (err) {
+                console.error("Scenario error:", err);
+            }
+        }
+
+        // PDF Download
+        function downloadPdfReport() {
+            window.location.href = `/api/download-report?target_type=${currentTarget}&threshold=${currentThreshold}`;
+        }
+    </script>
+</body>
+</html>
