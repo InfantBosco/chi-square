@@ -18,3 +18,11 @@ __pycache__/
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Vercel
+.vercel/
+
+# Large raw datasets
+data/raw/*.xlsx
+data/raw/online_retail.csv
+
